@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Configuration Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#3B82F6',
+                        'primary-dark': '#1F2937',
+                        'card-bg': '#1E293B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 1. BASE & ENVIRONMENT SETUP */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1E293B, #111827); /* Darker, gradient background */
+            background-size: 300% 300%;
+            animation: gradientShift 20s ease infinite; /* Subtle background movement */
+            min-height: 100vh;
+            /* Updated to stack navigation and main content vertically */
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-y: auto; /* Allow body to scroll if needed */
+            padding: 0; /* Removed vertical padding, handled by the new main wrapper */
+        }
+
+        /* Ensures the container itself can scroll if content overflows the reduced max-height */
+        .form-container-fix {
+            /* Max height adjusted for sticky navbar (h-16 = 4rem) and wrapper padding */
+            max-height: calc(100vh - 8rem);
+            overflow-y: auto; /* Allows content inside the container to scroll */
+            -webkit-overflow-scrolling: touch; /* Improved scrolling on iOS */
+        }
+
+        /* 2. BUBBLE BACKGROUND EFFECT */
+        .bubbles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+        }
+        .bubbles li {
+            position: absolute; list-style: none; display: block; width: 20px; height: 20px;
+            background-color: rgba(59, 130, 246, 0.15); /* Primary blue tint */
+            bottom: -150px;
+            animation: bubbleFloat 15s infinite; /* Adjusted for faster speed */
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            border-radius: 50%;
+        }
+        @keyframes bubbleFloat {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; border-radius: 50%; }
+            50% { opacity: 1; border-radius: 30%; } /* Slight shape change mid-float */
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        /* Individual bubble styling for size and speed variation */
+        .bubbles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-duration: 18s; }
+        .bubbles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-duration: 12s; animation-delay: 1.5s; border-radius: 20%; }
+        .bubbles li:nth-child(3) { left: 70%; width: 25px; height: 25px; animation-duration: 20s; }
+        .bubbles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-duration: 10s; animation-delay: 3s; }
+        .bubbles li:nth-child(5) { left: 65%; width: 15px; height: 15px; animation-duration: 18s; animation-delay: 0.5s; }
+        .bubbles li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-duration: 25s; border-radius: 0; }
+        .bubbles li:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-duration: 30s; animation-delay: 1s; }
+        .bubbles li:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-duration: 15s; animation-delay: 4s; }
+
+
+        /* Custom styles for appearance and transition effects */
+        .hidden-step {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, max-height 0.7s ease-out, transform 0.5s ease-out;
+            margin-bottom: 0 !important;
+        }
+
+        .visible-step {
+            opacity: 1;
+            max-height: 500px;
+            transform: translateY(0);
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        .radio-label {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+            border: 2px solid transparent;
+            background-color: #374151;
+            color: #D1D5DB;
+        }
+
+        input[type="radio"]:checked + .radio-label {
+            border-color: #3B82F6;
+            background-color: #1D4ED8;
+            color: #FFFFFF;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.5);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <ul class="bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+
+    <!-- INTEGRATED NAVIGATION BAR -->
+    <nav class="bg-gray-900/80 backdrop-blur-sm shadow-xl sticky top-0 z-20 border-b border-primary-blue/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+
+                <!-- Logo and Primary Links (Home, About) -->
+                <div class="flex items-center space-x-8">
+                    <a href="{{ url_for('home') }}" class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl font-extrabold text-white tracking-wider">Team ARcademy</span>
+                    </a>
+                    <!-- Nav Links -->
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-4">
+                        <a href="{{ url_for('home') }}" class="text-lg font-medium text-gray-300 hover:text-primary-blue transition duration-150 ease-in-out px-3 py-2 rounded-md">
+                            Home
+                        </a>
+                        <!-- Non-highlighted 'About' link -->
+                        <a href="{{ url_for('about') }}" class="text-lg font-medium text-gray-300 hover:text-primary-blue transition duration-150 ease-in-out px-3 py-2 rounded-md">
+                            About
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Marketplace/Form Link (Highlighted for this page) -->
+                <div class="flex items-center">
+                    <a href="{{ url_for('marketplace') }}" class="text-lg font-medium text-primary-blue hover:text-white transition duration-150 ease-in-out px-3 py-2 rounded-md bg-primary-blue/10 hover:bg-primary-blue/20">
+                        MarketPlace
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- New wrapper to vertically center the form content below the sticky navbar -->
+    <div class="flex flex-grow items-center justify-center p-4 sm:p-6 lg:p-8">
+
+        <div class="w-full max-w-lg p-6 md:p-10 bg-card-bg shadow-2xl rounded-xl border border-gray-700 z-10 form-container-fix">
+            <h1 class="text-3xl font-extrabold text-white mb-2 text-center">Design Configuration</h1>
+            <p class="text-gray-400 mb-8 text-center">Customize your image display and output settings.</p>
+
+            <form id="design-form" action="/upload" method="POST" enctype="multipart/form-data">
+
+                <div id="upload-reference-section" class="visible-step mb-8 p-4 bg-gray-700/30 rounded-lg border-l-4 border-primary-blue">
+                    <label class="text-lg font-semibold text-white block mb-3">1. Upload Reference Image</label>
+                    <input type="file" id="file-input-reference" accept="image/*" class="hidden" onchange="handleFileSelect(event, 'reference')" name="image">
+
+                    <button type="button" onclick="document.getElementById('file-input-reference').click()" id="upload-button-reference"
+                        class="w-full bg-primary-blue hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-[1.01] active:scale-95 flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <span id="upload-text-reference">Select Reference Image</span>
+                    </button>
+                </div>
+
+                <div id="output-options" class="hidden-step mb-8 p-4 bg-gray-700/30 rounded-lg border-l-4 border-transparent">
+                    <label class="text-lg font-semibold text-white block mb-4">2. Choose Output Type</label>
+                    <div class="grid grid-cols-2 gap-4">
+
+                        <div>
+                            <input type="radio" id="output-3d" name="output_type" value="3D Model" onchange="handleOutputSelect()" required>
+                            <label for="output-3d" class="radio-label block text-center p-4 rounded-lg hover:shadow-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-9h4v2h-4v-2zm-2-2h8v2h-8V9z"/>
+                                </svg>
+                                3D Model (.scn Input)
+                            </label>
+                        </div>
+
+                        <div>
+                            <input type="radio" id="output-video" name="output_type" value="Video Design" onchange="handleOutputSelect()">
+                            <label for="output-video" class="radio-label block text-center p-4 rounded-lg hover:shadow-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.552-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.448.894L15 14M15 4v16a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h11a1 1 0 011 1z" />
+                                </svg>
+                                Video (Input)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="upload-image-section" class="hidden-step mb-8 p-4 bg-gray-700/30 rounded-lg border-l-4 border-transparent">
+                    <label class="text-lg font-semibold text-white block mb-3">3. Upload 3D Model File (.scn)</label>
+                    <input type="file" id="file-input-image" accept=".scn" class="hidden" onchange="handleFileSelect(event, 'image')" name="output_type_filed">
+
+                    <button type="button" onclick="document.getElementById('file-input-image').click()" id="upload-button-image"
+                        class="w-full bg-primary-blue hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-[1.01] active:scale-95 flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <span id="upload-text-image">Select 3D Model (.scn) to Upload</span>
+                    </button>
+                </div>
+
+                <div id="upload-video-section" class="hidden-step mb-8 p-4 bg-gray-700/30 rounded-lg border-l-4 border-transparent">
+                    <label class="text-lg font-semibold text-white block mb-3">3. Upload Video</label>
+                    <input type="file" id="file-input-video" accept="video/*" class="hidden" onchange="handleFileSelect(event, 'video')" name="output_type_filev">
+
+                    <button type="button" onclick="document.getElementById('file-input-video').click()" id="upload-button-video"
+                        class="w-full bg-primary-blue hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-[1.01] active:scale-95 flex items-center justify-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.552-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.448.894L15 14M15 4v16a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1h11a1 1 0 011 1z" />
+                        </svg>
+                        <span id="upload-text-video">Select Video to Upload</span>
+                    </button>
+                </div>
+
+
+                <div id="display-options" class="hidden-step mb-8 p-4 bg-gray-700/30 rounded-lg border-l-4 border-transparent">
+                    <label class="text-lg font-semibold text-white block mb-4">4. Choose Display Orientation</label>
+                    <div class="grid grid-cols-2 gap-4">
+
+                        <div>
+                            <input type="radio" id="display-horizontal" name="display_orientation" value="Horizontal Table" onchange="handleDisplaySelect()" required>
+                            <label for="display-horizontal" class="radio-label block text-center p-4 rounded-lg hover:shadow-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7v10m-4-5h4m-4 0v-4m0 4v4m-8-4H4m4 0v-4m0 4v4" />
+                                </svg>
+                                Horizontal Table
+                            </label>
+                        </div>
+
+                        <div>
+                            <input type="radio" id="display-vertical" name="display_orientation" value="Vertical Wall" onchange="handleDisplaySelect()">
+                            <label for="display-vertical" class="radio-label block text-center p-4 rounded-lg hover:shadow-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4M4 20h16M4 4h16V20H4V4zm8 12V6" />
+                                </svg>
+                                Vertical Wall
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="width-input-section" class="hidden-step mb-10 p-4 bg-gray-700/30 rounded-lg border-l-4 border-transparent">
+                    <label for="image-width" class="text-lg font-semibold text-white block mb-4">5. Specify Image Width (in cm)</label>
+
+                    <div class="flex items-center space-x-2">
+                        <input type="number" id="image-width" name="width" min="1" placeholder="e.g., 50" required
+                            class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-primary-blue focus:ring focus:ring-primary-blue focus:ring-opacity-50 transition duration-150">
+                        <span class="text-gray-400 font-medium">cm</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">Enter the desired output width of the image (in centimeters).</p>
+                </div>
+
+                <button type="submit" id="submit-button" disabled
+                    class="w-full bg-gray-600 text-white font-bold py-3 px-4 rounded-lg shadow-xl transition duration-300 ease-in-out transform hover:scale-[1.00] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Generate Design
+                </button>
+
+                </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        // STEP 1: Reference Image
+        const uploadReferenceSection = document.getElementById('upload-reference-section');
+        const fileInputReference = document.getElementById('file-input-reference');
+        const uploadTextReference = document.getElementById('upload-text-reference');
+
+        // STEP 2: Output Options
+        const outputOptions = document.getElementById('output-options');
+
+        // STEP 3: Conditional Uploads
+        const uploadImageSection = document.getElementById('upload-image-section');
+        const fileInputImage = document.getElementById('file-input-image');
+        const uploadTextImage = document.getElementById('upload-text-image');
+        const uploadVideoSection = document.getElementById('upload-video-section');
+        const fileInputVideo = document.getElementById('file-input-video');
+        const uploadTextVideo = document.getElementById('upload-text-video');
+
+        // STEP 4 & 5: Display and Width
+        const displayOptions = document.getElementById('display-options');
+        const widthInputSection = document.getElementById('width-input-section');
+        const submitButton = document.getElementById('submit-button');
+
+        // State tracker
+        let currentUploadSection = null; // Tracks 'image' or 'video' for the required upload (Step 3)
+
+        // Helper function to show a step
+        function showStep(element) {
+            element.classList.remove('hidden-step');
+            element.classList.add('visible-step');
+            element.classList.remove('border-transparent');
+            element.classList.add('border-primary-blue');
+        }
+
+        // Helper function to hide a step and reset its file input
+        function hideStep(element, fileInput, uploadText, defaultText) {
+            element.classList.remove('visible-step');
+            element.classList.add('hidden-step');
+            element.classList.remove('border-green-400');
+            element.classList.add('border-transparent');
+            if (fileInput) {
+                fileInput.value = ''; // Reset the input value
+            }
+            if (uploadText && defaultText) {
+                 uploadText.textContent = defaultText;
+            }
+        }
+
+        // Helper function to check if the width input is valid
+        function checkWidthInput() {
+            const widthInput = document.getElementById('image-width');
+            return widthInput.value.length > 0 && parseInt(widthInput.value) > 0;
+        }
+
+        // --- Step Transition Logic ---
+
+        // 1. Handle Reference Image upload (STEP 1)
+        function handleReferenceSelect(event) {
+            handleFileSelect(event, 'reference');
+
+            // Show Step 2 after handling the file selection (whether successful or cancelled)
+            showStep(outputOptions);
+            updateSubmitButtonState();
+        }
+
+        // 2. Handle output type selection (STEP 2)
+        function handleOutputSelect() {
+            const outputType = document.querySelector('input[name="output_type"]:checked').value;
+
+            // Reset subsequent conditional uploads and downstream steps
+            // *** UPDATED DEFAULT TEXT FOR .scn ***
+            hideStep(uploadImageSection, fileInputImage, uploadTextImage, 'Select 3D Model (.scn) to Upload');
+            hideStep(uploadVideoSection, fileInputVideo, uploadTextVideo, 'Select Video to Upload');
+            hideStep(displayOptions);
+            hideStep(widthInputSection);
+
+            // Set required file inputs
+            fileInputImage.removeAttribute('required');
+            fileInputVideo.removeAttribute('required');
+
+            currentUploadSection = null; // Reset required upload tracker
+
+            // Show the appropriate conditional upload section (Step 3)
+            if (outputType === '3D Model') {
+                showStep(uploadImageSection);
+                currentUploadSection = 'image';
+                fileInputImage.setAttribute('required', 'required');
+            } else if (outputType === 'Video Design') {
+                showStep(uploadVideoSection);
+                currentUploadSection = 'video';
+                fileInputVideo.setAttribute('required', 'required');
+            }
+
+            updateSubmitButtonState();
+        }
+
+        // 3. Handle 3D Model or Video upload (STEP 3)
+        // This function now also handles the non-required Reference Image (STEP 1)
+        function handleFileSelect(event, type) {
+            let fileInput;
+            let uploadText;
+            let uploadSection;
+            let defaultText;
+
+            if (type === 'reference') {
+                fileInput = fileInputReference;
+                uploadText = uploadTextReference;
+                uploadSection = uploadReferenceSection;
+                defaultText = 'Select Reference Image';
+            } else if (type === 'image') {
+                fileInput = fileInputImage;
+                uploadText = uploadTextImage;
+                uploadSection = uploadImageSection;
+                // *** UPDATED DEFAULT TEXT FOR .scn ***
+                defaultText = 'Select 3D Model (.scn) to Upload';
+            } else if (type === 'video') {
+                fileInput = fileInputVideo;
+                uploadText = uploadTextVideo;
+                uploadSection = uploadVideoSection;
+                defaultText = 'Select Video to Upload';
+            }
+
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                uploadText.textContent = `File Selected: ${fileName}`;
+
+                // Change border color to signify completion
+                uploadSection.classList.add('border-green-400');
+                uploadSection.classList.remove('border-primary-blue');
+
+                // If this is the primary, required file (image/video), move to Step 4
+                if (type === 'image' || type === 'video') {
+                    showStep(displayOptions);
+                }
+
+            } else {
+                // If file selection is cancelled, reset state
+                uploadText.textContent = defaultText;
+                uploadSection.classList.remove('border-green-400');
+                uploadSection.classList.add('border-primary-blue');
+
+                // If the primary file is cancelled, hide subsequent steps
+                if (type === 'image' || type === 'video') {
+                    hideStep(displayOptions);
+                    hideStep(widthInputSection);
+                }
+            }
+            updateSubmitButtonState();
+        }
+
+        // 4. Handle display orientation selection (STEP 4)
+        function handleDisplaySelect() {
+            // Move to Step 5
+            showStep(widthInputSection);
+
+            // Set up listener for width input change to enable/disable button
+            const widthInput = document.getElementById('image-width');
+            updateSubmitButtonState();
+            widthInput.addEventListener('input', updateSubmitButtonState);
+        }
+
+        function updateSubmitButtonState() {
+            // Check required fields
+            const outputSelected = document.querySelector('input[name="output_type"]:checked');
+            const displaySelected = document.querySelector('input[name="display_orientation"]:checked');
+            const widthValid = widthInputSection.classList.contains('visible-step') ? checkWidthInput() : false;
+
+            // Check if the primary file (3D Model or Video) is selected
+            let primaryFileSelected = false;
+            if (currentUploadSection === 'image') {
+                primaryFileSelected = fileInputImage.files.length > 0;
+            } else if (currentUploadSection === 'video') {
+                primaryFileSelected = fileInputVideo.files.length > 0;
+            }
+
+            // The submit button should be enabled only when:
+            // 1. Output Type (Step 2) is selected
+            // 2. The correct conditional upload (Step 3) is complete
+            // 3. Display Orientation (Step 4) is selected
+            // 4. Width (Step 5) is valid
+
+            const allStepsComplete = outputSelected && primaryFileSelected && displaySelected && widthValid;
+
+            submitButton.disabled = !allStepsComplete;
+            // Change submit button appearance when enabled
+            if (allStepsComplete) {
+                submitButton.classList.remove('bg-gray-600');
+                submitButton.classList.add('bg-primary-blue', 'hover:bg-blue-600');
+            } else {
+                submitButton.classList.add('bg-gray-600');
+                submitButton.classList.remove('bg-primary-blue', 'hover:bg-blue-600');
+            }
+        }
+
+        // Initial setup on load
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('design-form').reset();
+            submitButton.disabled = true;
+            submitButton.classList.add('bg-gray-600');
+            submitButton.classList.remove('bg-primary-blue', 'hover:bg-blue-600');
+
+            // Re-assign the change handler for the Reference Image to the new combined handler
+            fileInputReference.onchange = handleReferenceSelect;
+
+            // Add listeners for radio buttons to update submit button state
+            document.querySelectorAll('input[name="output_type"], input[name="display_orientation"]').forEach(input => {
+                input.addEventListener('change', updateSubmitButtonState);
+            });
+            // Ensure width input listener is available even if not immediately shown
+            document.getElementById('image-width').addEventListener('input', updateSubmitButtonState);
+
+            // Initially, only Step 1 is visible. Set Step 2 to react to file selection.
+            outputOptions.classList.remove('visible-step');
+            outputOptions.classList.add('hidden-step');
+            uploadReferenceSection.classList.add('visible-step');
+        });
+    </script>
+</body>
+</html>

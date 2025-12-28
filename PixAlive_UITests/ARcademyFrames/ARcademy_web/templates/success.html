@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Submission Success | Hackathon Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-blue': '#3B82F6',
+                        'primary-dark': '#1F2937',
+                        'card-bg': '#1E293B',
+                        'neon-green': '#39FF14',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 1. BASE & ENVIRONMENT SETUP (Modified for scroll) */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a, #1E293B, #111827); 
+            background-size: 300% 300%;
+            animation: gradientShift 20s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            color: #E5E7EB;
+            /* --- FIX: Allow scrolling and provide safety padding --- */
+            overflow-y: auto; /* Allow vertical scrolling if content is too tall */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding: 20px 0; /* Add vertical padding so the card is visible at the top/bottom */
+        }
+        
+        /* 2. BUBBLE BACKGROUND EFFECT (Retained) */
+        .bubbles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+        }
+        .bubbles li {
+            position: absolute; list-style: none; display: block; width: 20px; height: 20px;
+            background-color: rgba(59, 130, 246, 0.15);
+            bottom: -150px; animation: bubbleFloat 25s infinite; border-radius: 50%;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        @keyframes bubbleFloat {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; border-radius: 0; }
+            50% { opacity: 1; border-radius: 50%; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        .bubbles li:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-duration: 25s; }
+        .bubbles li:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-duration: 20s; animation-delay: 2s; }
+        .bubbles li:nth-child(3) { left: 70%; width: 25px; height: 25px; animation-duration: 30s; }
+        .bubbles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-duration: 15s; animation-delay: 4s; }
+        .bubbles li:nth-child(5) { left: 65%; width: 15px; height: 15px; animation-duration: 28s; animation-delay: 1s; }
+        .bubbles li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-duration: 35s; }
+        .bubbles li:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-duration: 40s; animation-delay: 2s; }
+        .bubbles li:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-duration: 22s; animation-delay: 5s; }
+
+        /* 3. CORE ENTRANCE ANIMATION: Smooth Slide-In */
+        @keyframes smoothSlideIn {
+            0% { 
+                opacity: 0; 
+                transform: translateX(-100vw);
+                box-shadow: 0 0 0 rgba(59, 130, 246, 0); 
+                border-color: transparent;
+            }
+            70% { 
+                opacity: 1;
+                transform: translateX(0); 
+                box-shadow: 0 0 40px 10px rgba(57, 255, 20, 0.7); /* Neon Green Initial Flash */
+            }
+            100% { 
+                opacity: 1;
+                transform: translateX(0); 
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.3);
+                border-color: rgba(100, 116, 139, 0.5);
+            }
+        }
+
+        .success-card {
+            animation: smoothSlideIn 1.8s ease-out forwards;
+            position: relative; 
+            transition: all 0.5s ease;
+            backface-visibility: hidden;
+            border: 1px solid rgba(100, 116, 139, 0.5);
+            /* --- FIX: Constrain height and allow internal scrolling --- */
+            max-height: calc(100vh - 40px); 
+            overflow-y: auto; 
+        }
+        
+        /* 4. ICON ANIMATION (Pulse/Wiggle) */
+        @keyframes iconBounceDrop {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.15) translateY(-5px); }
+        }
+        
+        .success-icon {
+            animation: iconBounceDrop 1.5s ease-in-out infinite alternate 1.8s; 
+            filter: drop-shadow(0 0 8px #39FF14);
+        }
+
+        /* 5. SUMMARY BOX GLOW (Retained) */
+        .summary-box {
+            position: relative; overflow: hidden;
+            border: 1px solid rgba(100, 116, 139, 0.5);
+        }
+        
+        .summary-box::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent 0%, rgba(57, 255, 20, 0.5) 30%, transparent 70%); 
+            z-index: 0;
+            transform: rotate(0deg);
+            animation: rotateGlow 6s linear infinite;
+            opacity: 0.4;
+        }
+        
+        @keyframes rotateGlow {
+            to { transform: rotate(-360deg); } 
+        }
+
+        .summary-content {
+            position: relative; z-index: 10;
+        }
+
+        /* 6. Button Enhancement (Retained) */
+        .cta-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.8), 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        .cta-button:hover {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 1), 0 0 10px rgba(255, 255, 255, 0.8);
+            background-color: #2563EB;
+        }
+
+        /* 7. Image Hover Effect (Retained) */
+        .preview-img {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .preview-img:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.7); 
+        }
+    </style>
+</head>
+<body>
+    <ul class="bubbles">
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+
+    <div class="success-card w-full max-w-lg p-8 md:p-10 bg-card-bg rounded-xl border border-gray-700 text-center">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" class="success-icon h-16 w-16 mx-auto text-neon-green mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h1 class="text-3xl font-extrabold text-white mb-4 drop-shadow-lg" style="text-shadow: 0 0 5px #39FF14;">
+            MISSION COMPLETE! 🏆
+        </h1>
+        <p class="text-gray-400 mb-8">
+            Your design configuration is locked in. Ready for deployment.
+        </p>
+
+        <div class="summary-box space-y-4 text-left p-4 bg-gray-700/30 rounded-lg">
+             <div class="summary-content">
+                <p class="text-xl font-bold text-white mb-3 border-b border-gray-500 pb-2">Configuration Summary</p>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex justify-between transition duration-150 hover:text-white transform hover:scale-[1.01]">
+                        <span class="font-medium text-gray-400">File Uploaded:</span>
+                        <span class="text-primary-blue font-mono truncate max-w-[60%]">{{ filename | default('design_v1.0.cfg') }}</span>
+                    </li>
+                    <li class="flex justify-between transition duration-150 hover:text-white transform hover:scale-[1.01]">
+                        <span class="font-medium text-gray-400">Output Type:</span>
+                        <span class="font-semibold">{{ output_type | default('High-Res SVG') }}</span>
+                    </li>
+                    <li class="flex justify-between transition duration-150 hover:text-white transform hover:scale-[1.01]">
+                        <span class="font-medium text-gray-400">Display Orientation:</span>
+                        <span class="font-semibold">{{ display_orientation | default('Landscape (Wide)') }}</span>
+                    </li>
+                    <li class="flex justify-between transition duration-150 hover:text-white transform hover:scale-[1.01]">
+                        <span class="font-medium text-gray-400">Image Width:</span>
+                        <span class="font-semibold">{{ width | default(42) }} cm</span>
+                    </li>
+                </ul>
+                {% if filename %}
+                <div class="mt-8 text-center">
+                    <p class="text-sm text-gray-500 mb-4">Processed Image Preview</p>
+                    <img src="{{ url_for('static', filename='uploads/' + filename) }}" 
+                         alt="Uploaded Image Preview" 
+                         class="preview-img max-w-full h-auto rounded-lg shadow-xl mx-auto border-4 border-primary-blue/50 cursor-pointer"
+                         style="max-height: 200px; object-fit: contain;">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <a href="/" class="cta-button mt-10 inline-block bg-primary-blue hover:bg-blue-600 text-white font-semibold py-3 px-8 rounded-full shadow-2xl shadow-primary-blue/50 transform hover:scale-105 active:scale-95">
+            Start a New Configuration
+        </a>
+    </div>
+</body>
+</html>
